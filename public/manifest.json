@@ -1,0 +1,18 @@
+{
+  "name": "Al Kanzou — Carrés",
+  "short_name": "Al Kanzou",
+  "description": "Génération de carrés numériques (wafq) — 3x3 à 10x10.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#120E09",
+  "theme_color": "#C9A15A",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
