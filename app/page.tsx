@@ -1,7 +1,7 @@
 import PorteCarre from "@/components/PorteCarre";
 
-const ACTIVE_SIZES = [3, 4, 5, 6, 7, 8, 9, 10];
-const ALL_SIZES = [3, 4, 5, 6, 7, 8, 9, 10];
+const ACTIVE_SIZES = [3, 4, 5, 6, 7, 8, 9, 10, 11];
+const ALL_SIZES = [3, 4, 5, 6, 7, 8, 9, 10, 11];
 
 export default function HomePage() {
   return (
@@ -14,7 +14,7 @@ export default function HomePage() {
           Carrés numériques
         </h1>
         <p className="mt-4 max-w-xl text-muted leading-relaxed">
-          Huit portes, huit tailles de carré. Choisissez une taille pour
+          Neuf portes, neuf tailles de carré. Choisissez une taille pour
           renseigner vos valeurs de départ et obtenir le carré complet.
         </p>
 
@@ -29,9 +29,10 @@ export default function HomePage() {
         </div>
 
         <p className="mt-10 text-xs text-muted">
-          Les huit tailles sont couvertes — chacune reprend fidèlement
-          sa formule d'origine, sauf le 10×10 (jamais implémenté dans
-          l'app d'origine) qui utilise un carré magique de référence.
+          Les neuf tailles sont couvertes — chacune reprend fidèlement sa
+          formule d'origine, sauf le 10×10 et le 11×11 (absents ou jamais
+          implémentés dans l'app d'origine), qui utilisent un carré
+          magique de référence.
         </p>
       </div>
     </main>

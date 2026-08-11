@@ -482,3 +482,50 @@ export function carre10(base: number): Square10 {
 export const SQUARE10_LAYOUT: number[][] = Array.from({ length: 10 }, (_, r) =>
   Array.from({ length: 10 }, (_, c) => r * 10 + c)
 );
+
+// ---------------------------------------------------------------------
+// 11x11
+// ---------------------------------------------------------------------
+
+export interface Square11 {
+  t: number[]; // t[0]..t[120], en ordre visuel ligne par ligne
+}
+
+const OFFSET_11 = 660; // = 11 x (11² - 1) / 2, même formule que les autres tailles
+
+/**
+ * Carré 11x11 : taille absente de l'app Android d'origine (le plus
+ * grand carré développé était le 10x10, resté inachevé). Même
+ * principe que carre10 : carré de référence fourni par l'utilisateur
+ * — vérifié comme carré magique complet et valide (les 11 lignes, les
+ * 11 colonnes ET les deux diagonales somment toutes à 671, avec les
+ * 121 entiers de 1 à 121 utilisés une seule fois chacun) — généralisé
+ * à une valeur de base arbitraire par décalage uniforme :
+ * k = trunc((base - 660) / 11), chaque case = valeur de référence
+ * + (k - 1). base = 671 restitue exactement le carré de référence
+ * (k = 1), base = 660 donne le carré 0..120 (k = 0).
+ */
+const SQUARE11_REFERENCE: number[][] = [
+  [68, 81, 94, 107, 120, 1, 14, 27, 40, 53, 66],
+  [80, 93, 106, 119, 11, 13, 26, 39, 52, 65, 67],
+  [92, 105, 118, 10, 12, 25, 38, 51, 64, 77, 79],
+  [104, 117, 9, 22, 24, 37, 50, 63, 76, 78, 91],
+  [116, 8, 21, 23, 36, 49, 62, 75, 88, 90, 103],
+  [7, 20, 33, 35, 48, 61, 74, 87, 89, 102, 115],
+  [19, 32, 34, 47, 60, 73, 86, 99, 101, 114, 6],
+  [31, 44, 46, 59, 72, 85, 98, 100, 113, 5, 18],
+  [43, 45, 58, 71, 84, 97, 110, 112, 4, 17, 30],
+  [55, 57, 70, 83, 96, 109, 111, 3, 16, 29, 42],
+  [56, 69, 82, 95, 108, 121, 2, 15, 28, 41, 54],
+];
+
+export function carre11(base: number): Square11 {
+  const k = trunc((base - OFFSET_11) / 11);
+  const t = SQUARE11_REFERENCE.flat().map((v) => trunc(v - 1 + k));
+  return { t };
+}
+
+// Carré de référence déjà donné dans l'ordre visuel : disposition = identité.
+export const SQUARE11_LAYOUT: number[][] = Array.from({ length: 11 }, (_, r) =>
+  Array.from({ length: 11 }, (_, c) => r * 11 + c)
+);
