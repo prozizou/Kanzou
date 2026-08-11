@@ -1,0 +1,414 @@
+/**
+ * Moteur de calcul des carrés (wafq).
+ *
+ * Ces formules sont portées TELLES QUELLES depuis le code Java d'origine
+ * (Ghaz1Activity.java pour le 3x3, M4x4Activity.java pour le 4x4,
+ * projet Sketchware "Al Kanzou Pro" / com.alkanzouHatim).
+ *
+ * `trunc()` reproduit exactement le cast `(long)` de Java : troncature
+ * vers zéro, pas un arrondi. Je n'ai PAS changé cette troncature pour
+ * ne pas modifier les résultats numériques par rapport à l'app d'origine.
+ */
+
+const trunc = (n: number) => Math.trunc(n);
+
+// ---------------------------------------------------------------------
+// 3x3
+// ---------------------------------------------------------------------
+
+export interface Square3 {
+  e1: number;
+  e2: number;
+  e3: number;
+  e4: number;
+  e5: number | string;
+  e6: number;
+  e7: number;
+  e8: number;
+  e9: number;
+}
+
+/**
+ * Mode "Wilaya" : 3 valeurs connues (e2, e4, e9) -> complète les 6 autres.
+ * (dans l'app d'origine, e1/e3/e5/e6/e7/e8 étaient désactivés = calculés)
+ */
+export function wilaya(e2: number, e4: number, e9: number): Square3 {
+  let e6: number;
+  let e8: number;
+  if (e9 % 2 === 0) {
+    e6 = trunc(e9 / 2);
+    e8 = trunc(e9 / 2);
+  } else {
+    e6 = trunc(e9 / 2);
+    e8 = trunc(e9 / 2) + 1;
+  }
+  const e7 = trunc(e4 + e8);
+  const e3 = trunc(e2 + e6);
+  const e1 = trunc(e4 + e2);
+  const e5 = `الحاجة + ${trunc(e9 + e1)}`;
+  return { e1, e2, e3, e4, e5, e6, e7, e8, e9 };
+}
+
+/**
+ * Mode "Ghazaly" : une seule valeur (la "hajah") -> complète tout le carré.
+ */
+export function ghazaly(hajah: number): Square3 {
+  const base = (hajah - 12) / 3;
+  const e1 = trunc(base);
+  const e2 = trunc(base + 1);
+  const e3 = trunc(base + 2);
+  const e4 = trunc(base + 3);
+  const e5 = trunc(base + 4);
+  const e6 = trunc(base + 5);
+  const e7 = trunc(hajah - (e3 + e5));
+  const e8 = trunc(hajah - (e1 + e6));
+  const e9 = trunc(hajah - (e2 + e4));
+  return { e1, e2, e3, e4, e5, e6, e7, e8, e9 };
+}
+
+/**
+ * Mode "Bayt" : deux valeurs — la "hajah" (base générale) et une base
+ * secondaire ("entrée").
+ *
+ * BUG CORRIGÉ par rapport à l'app d'origine : dans Ghaz1Activity.java, le
+ * champ "entrée" avait un TextWatcher qui s'auto-multipliait par 3 sur
+ * CHAQUE frappe (il s'écoutait lui-même au lieu d'écouter le champ
+ * "hajah"), ce qui provoquait un emballement (1 -> 3 -> 9 -> 27 ...) dès
+ * la première touche tapée. Le comportement manifestement voulu était
+ * "entrée" = 3 x hajah, calculé automatiquement. Ici, l'UI web propose
+ * cette valeur par défaut mais reste éditable.
+ */
+export function bayt(hajah: number, entree: number): Square3 {
+  const e6 = trunc(entree);
+  const e4 = trunc(e6 * 2);
+  const e8 = trunc(e6 * 4);
+  const e9 = trunc(e6 * 5);
+  const e7 = trunc(e6 * 6);
+  const e2 = trunc(hajah - (e7 + e6));
+  const e3 = trunc(hajah - (e4 + e8));
+  const e1 = trunc(hajah - (e6 + e8));
+  const e5 = "x";
+  return { e1, e2, e3, e4, e5, e6, e7, e8, e9 };
+}
+
+// Ordre d'affichage visuel de la grille 3x3 (voir ghaz1.xml) :
+// Rangée 1 : e4 | e9 | e2
+// Rangée 2 : e3 | e5 | e7
+// Rangée 3 : e8 | e1 | e6
+export const SQUARE3_LAYOUT: (keyof Square3)[][] = [
+  ["e4", "e9", "e2"],
+  ["e3", "e5", "e7"],
+  ["e8", "e1", "e6"],
+];
+
+// ---------------------------------------------------------------------
+// 4x4
+// ---------------------------------------------------------------------
+
+export interface Square4 {
+  t: number[]; // t[0]..t[15] = t1..t16 dans le code Java
+}
+
+/**
+ * Carré 4x4 : une seule valeur de base -> complète les 16 cases.
+ * (M4x4Activity.java : textview1..textview16, edittext1)
+ */
+export function carre4(base: number): Square4 {
+  const t: number[] = [];
+  for (let i = 0; i < 12; i++) {
+    t.push(trunc((base - 30) / 4 + i));
+  }
+  // t[12]=t13, t[13]=t14, t[14]=t15, t[15]=t16 (index Java -1)
+  const t13 = trunc(base - (t[1] + t[6] + t[11])); // t2 + t7 + t12
+  const t14 = trunc(base - (t[0] + t[10] + t[7])); // t1 + t11 + t8
+  const t15 = trunc(base - (t[9] + t[4] + t[3])); // t10 + t5 + t4
+  const t16 = trunc(base - (t[2] + t[8] + t[5])); // t3 + t9 + t6
+  t.push(t13, t14, t15, t16);
+  return { t };
+}
+
+// Disposition visuelle réelle du 4x4 (vérifiée dans m4x4.xml — l'ordre
+// des vues n'est PAS textview1..16 dans l'ordre, comme pour le 3x3) :
+// Rangée 1 : t8  t11 t14 t1
+// Rangée 2 : t13 t2  t7  t12
+// Rangée 3 : t3  t16 t9  t6
+// Rangée 4 : t10 t5  t4  t15
+export const SQUARE4_LAYOUT: number[][] = [
+  [7, 10, 13, 0],
+  [12, 1, 6, 11],
+  [2, 15, 8, 5],
+  [9, 4, 3, 14],
+];
+
+// ---------------------------------------------------------------------
+// 5x5
+// ---------------------------------------------------------------------
+
+export interface Square5 {
+  t: (number | null)[]; // t[0]..t[24] = textview1..textview25 dans le code Java
+  total?: number; // uniquement renseigné en mode "Askandria"
+}
+
+/**
+ * Mode "Base" : une seule valeur -> complète les 25 cases.
+ * (M5x5Activity.java : bouton "button1")
+ */
+export function carre5Base(base: number): Square5 {
+  const t: number[] = [];
+  for (let i = 0; i < 20; i++) {
+    t.push(trunc((base - 60) / 5 + i));
+  }
+  const t21 = trunc(base - (t[4] + t[16] + t[8] + t[12])); // t5+t17+t9+t13
+  const t22 = trunc(base - (t[17] + t[9] + t[13] + t[0])); // t18+t10+t14+t1
+  const t23 = trunc(base - (t[5] + t[14] + t[1] + t[18])); // t6+t15+t2+t19
+  const t24 = trunc(base - (t[10] + t[2] + t[19] + t[6])); // t11+t3+t20+t7
+  const t25 = trunc(base - (t[11] + t[3] + t[15] + t[7])); // t12+t4+t16+t8
+  t.push(t21, t22, t23, t24, t25);
+  return { t };
+}
+
+/**
+ * Mode "Askandria" : 4 valeurs connues (t8, t4, t21, t17 — les 4
+ * "éléments" du 3x3 "Mouhamass" quand on enchaîne depuis le carré 3x3)
+ * -> complète les 20 cases restantes. La case centrale (t15) reste
+ * vide, comme dans l'app d'origine (case "vœux").
+ * (M5x5Activity.java : bouton "imageview1")
+ */
+export function carre5Askandria(
+  t8: number,
+  t4: number,
+  t21: number,
+  t17: number
+): Square5 {
+  // Reproduit le bloc if/else Java : division par 4 avec reste,
+  // renvoie [quotient/quart, 3x quotient]
+  function quarter(v: number): [number, number] {
+    if (v % 4 === 0) {
+      return [trunc(v / 4), trunc((v / 4) * 3)];
+    }
+    const q = trunc(v / 4);
+    return [trunc(q + (v % 4)), trunc(q * 3)];
+  }
+
+  const [t10, t13] = quarter(t8);
+  const [t14, t5] = quarter(t4);
+  const [t25, t11] = quarter(t21);
+  const [t12, t20] = quarter(t17);
+
+  const t3 = trunc(t13 + t5);
+  const t6 = trunc(t10 + t11);
+  const t19 = trunc(t14 + t20);
+  const t18 = trunc(t20 + t13);
+  const t7 = trunc(t10 + t12);
+  const t1 = trunc(t5 + t11);
+  const t24 = trunc(t14 + t25);
+  const t9 = trunc(t10 + t14);
+  const t16 = trunc(t11 + t20);
+  const t2 = trunc(t12 + t5);
+  const t23 = trunc(t25 + t13);
+  const t22 = trunc(t12 + t25);
+  const total = trunc(t8 + t4 + t21 + t17);
+
+  const t: (number | null)[] = new Array(25).fill(null);
+  t[0] = t1; t[1] = t2; t[2] = t3; t[3] = t4; t[4] = t5;
+  t[5] = t6; t[6] = t7; t[7] = t8; t[8] = t9; t[9] = t10;
+  t[10] = t11; t[11] = t12; t[12] = t13; t[13] = t14; // t[14] = t15 -> reste null
+  t[15] = t16; t[16] = t17; t[17] = t18; t[18] = t19; t[19] = t20;
+  t[20] = t21; t[21] = t22; t[22] = t23; t[23] = t24; t[24] = t25;
+
+  return { t, total };
+}
+
+// Disposition visuelle réelle du 5x5 (vérifiée dans m5x5.xml)
+// Rangée 1 : t18 t10 t22 t14 t1
+// Rangée 2 : t12 t4  t16 t8  t25
+// Rangée 3 : t6  t23 t15 t2  t19
+// Rangée 4 : t5  t17 t9  t21 t13
+// Rangée 5 : t24 t11 t3  t20 t7
+export const SQUARE5_LAYOUT: number[][] = [
+  [17, 9, 21, 13, 0],
+  [11, 3, 15, 7, 24],
+  [5, 22, 14, 1, 18],
+  [4, 16, 8, 20, 12],
+  [23, 10, 2, 19, 6],
+];
+
+// ---------------------------------------------------------------------
+// 6x6
+// ---------------------------------------------------------------------
+
+export interface Square6 {
+  t: number[]; // t[0]..t[35] = textview1..textview36
+}
+
+/**
+ * Carré 6x6 : une seule valeur de base -> complète les 36 cases.
+ * (M6x6Activity.java : bouton "materialbutton1", soustraction=105, div=6)
+ */
+export function carre6(base: number): Square6 {
+  const t: number[] = [];
+  for (let i = 0; i < 30; i++) {
+    t.push(trunc((base - 105) / 6 + i));
+  }
+  const t31 = trunc(base - (t[12] + t[3] + t[27] + t[10] + t[23])); // t13+t4+t28+t11+t24
+  const t32 = trunc(base - (t[20] + t[6] + t[7] + t[26] + t[15])); // t21+t7+t8+t27+t16
+  const t33 = trunc(base - (t[16] + t[5] + t[25] + t[8] + t[19])); // t17+t6+t26+t9+t20
+  const t34 = trunc(base - (t[29] + t[4] + t[9] + t[28] + t[2])); // t30+t5+t10+t29+t3
+  const t35 = trunc(base - (t[0] + t[22] + t[21] + t[11] + t[17])); // t1+t23+t22+t12+t18
+  const t36 = trunc(base - (t[24] + t[14] + t[13] + t[1] + t[18])); // t25+t15+t14+t2+t19
+  t.push(t31, t32, t33, t34, t35, t36);
+  return { t };
+}
+
+// Disposition visuelle réelle du 6x6 (vérifiée dans m6x6.xml)
+// Rangée 1 : t18 t12 t22 t23 t35 t1
+// Rangée 2 : t3  t29 t10 t5  t30 t34
+// Rangée 3 : t13 t4  t31 t28 t11 t24
+// Rangée 4 : t21 t32 t7  t8  t27 t16
+// Rangée 5 : t20 t9  t26 t33 t6  t17
+// Rangée 6 : t36 t25 t15 t14 t2  t19
+export const SQUARE6_LAYOUT: number[][] = [
+  [17, 11, 21, 22, 34, 0],
+  [2, 28, 9, 4, 29, 33],
+  [12, 3, 30, 27, 10, 23],
+  [20, 31, 6, 7, 26, 15],
+  [19, 8, 25, 32, 5, 16],
+  [35, 24, 14, 13, 1, 18],
+];
+
+// ---------------------------------------------------------------------
+// 7x7
+// ---------------------------------------------------------------------
+
+export interface Square7 {
+  t: number[]; // t[0]..t[48] = textview1..textview49
+}
+
+/**
+ * Carré 7x7 : une seule valeur de base -> complète les 49 cases.
+ * (M7x7Activity.java : bouton "materialbutton1", soustraction=168, div=7)
+ */
+export function carre7(base: number): Square7 {
+  const t: number[] = [];
+  for (let i = 0; i < 42; i++) {
+    t.push(trunc((base - 168) / 7 + i));
+  }
+  const t43 = trunc(base - (t[32] + t[10] + t[27] + t[37] + t[5] + t[15])); // t33+t11+t28+t38+t6+t16
+  const t44 = trunc(base - (t[6] + t[38] + t[21] + t[11] + t[33] + t[16])); // t7+t39+t22+t12+t34+t17
+  const t45 = trunc(base - (t[39] + t[22] + t[12] + t[34] + t[17] + t[0])); // t40+t23+t13+t35+t18+t1
+  const t46 = trunc(base - (t[23] + t[13] + t[28] + t[18] + t[1] + t[40])); // t24+t14+t29+t19+t2+t41
+  const t47 = trunc(base - (t[7] + t[29] + t[19] + t[2] + t[41] + t[24])); // t8+t30+t20+t3+t42+t25
+  const t48 = trunc(base - (t[30] + t[20] + t[3] + t[35] + t[25] + t[8])); // t31+t21+t4+t36+t26+t9
+  const t49 = trunc(base - (t[31] + t[14] + t[4] + t[36] + t[26] + t[9])); // t32+t15+t5+t37+t27+t10
+  t.push(t43, t44, t45, t46, t47, t48, t49);
+  return { t };
+}
+
+// Disposition visuelle réelle du 7x7 (vérifiée dans m7x7.xml)
+// Rangée 1 : t40 t23 t13 t45 t35 t18 t1
+// Rangée 2 : t32 t15 t5  t37 t27 t10 t49
+// Rangée 3 : t24 t14 t46 t29 t19 t2  t41
+// Rangée 4 : t16 t6  t38 t28 t11 t43 t33
+// Rangée 5 : t8  t47 t30 t20 t3  t42 t25
+// Rangée 6 : t7  t39 t22 t12 t44 t34 t17
+// Rangée 7 : t48 t31 t21 t4  t36 t26 t9
+export const SQUARE7_LAYOUT: number[][] = [
+  [39, 22, 12, 44, 34, 17, 0],
+  [31, 14, 4, 36, 26, 9, 48],
+  [23, 13, 45, 28, 18, 1, 40],
+  [15, 5, 37, 27, 10, 42, 32],
+  [7, 46, 29, 19, 2, 41, 24],
+  [6, 38, 21, 11, 43, 33, 16],
+  [47, 30, 20, 3, 35, 25, 8],
+];
+
+// ---------------------------------------------------------------------
+// 8x8
+// ---------------------------------------------------------------------
+
+export interface Square8 {
+  t: number[]; // t[0]..t[63] = textview1..textview64
+}
+
+/**
+ * Carré 8x8 : une seule valeur de base (minimum 252, contrôlé dans
+ * l'app d'origine) -> complète les 64 cases.
+ * (M8x8Activity.java : bouton "imageview1", offset=252, div=8. Les
+ * TimerTask échelonnées de 1s en 1s — un simple effet de révélation
+ * case par case avec animation de rotation — ne sont pas reproduites,
+ * le calcul est instantané ici.)
+ */
+export function carre8(base: number): Square8 {
+  const t: number[] = [];
+  for (let i = 0; i < 56; i++) {
+    t.push(trunc((base - 252) / 8 + i));
+  }
+  const t57 = trunc(base - (t[9] + t[23] + t[38] + t[26] + t[43] + t[4] + t[53]));
+  const t58 = trunc(base - (t[22] + t[39] + t[8] + t[5] + t[52] + t[27] + t[42]));
+  const t59 = trunc(base - (t[55] + t[6] + t[41] + t[24] + t[36] + t[21] + t[11]));
+  const t60 = trunc(base - (t[40] + t[25] + t[54] + t[7] + t[10] + t[37] + t[20]));
+  const t61 = trunc(base - (t[13] + t[18] + t[35] + t[31] + t[46] + t[49] + t[0]));
+  const t62 = trunc(base - (t[19] + t[34] + t[12] + t[48] + t[1] + t[30] + t[47]));
+  const t63 = trunc(base - (t[2] + t[51] + t[44] + t[29] + t[33] + t[16] + t[15]));
+  const t64 = trunc(base - (t[45] + t[28] + t[3] + t[50] + t[14] + t[32] + t[17]));
+  t.push(t57, t58, t59, t60, t61, t62, t63, t64);
+  return { t };
+}
+
+// Disposition visuelle réelle du 8x8 (vérifiée dans m8x8.xml)
+export const SQUARE8_LAYOUT: number[][] = [
+  [60, 13, 18, 35, 31, 46, 49, 0],
+  [19, 34, 61, 12, 48, 1, 30, 47],
+  [45, 28, 3, 50, 14, 63, 32, 17],
+  [2, 51, 44, 29, 33, 16, 15, 62],
+  [55, 6, 41, 24, 36, 21, 58, 11],
+  [40, 25, 54, 7, 59, 10, 37, 20],
+  [22, 39, 8, 57, 5, 52, 27, 42],
+  [9, 56, 23, 38, 26, 43, 4, 53],
+];
+
+// ---------------------------------------------------------------------
+// 9x9
+// ---------------------------------------------------------------------
+
+export interface Square9 {
+  t: (number | null)[]; // t[0]..t[80] = textview1..textview81
+}
+
+/**
+ * Carré 9x9 : une seule valeur de base (minimum 360) -> ne remplit
+ * QUE les 72 premières cases.
+ *
+ * IMPORTANT : dans M9x9Activity.java, le code s'arrête après
+ * textview72 avec un commentaire "//KASR" et rien d'autre — les 9
+ * dernières cases (textview73 à textview81) sont déclarées et liées
+ * (findViewById) mais ne sont JAMAIS calculées dans le code source.
+ * Ce n'est pas un choix de conception : ça ressemble à un
+ * développement laissé inachevé dans l'app d'origine. Plutôt que
+ * d'inventer une formule pour ces 9 cases, je les laisse vides ici,
+ * fidèle à ce que fait réellement l'app Android.
+ * (M9x9Activity.java : bouton "imageview1", offset=360, div=9)
+ */
+export function carre9(base: number): Square9 {
+  const t: (number | null)[] = [];
+  for (let i = 0; i < 72; i++) {
+    t.push(trunc((base - 360) / 9 + i));
+  }
+  for (let i = 72; i < 81; i++) {
+    t.push(null); // jamais calculées dans le code d'origine
+  }
+  return { t };
+}
+
+// Disposition visuelle réelle du 9x9 (vérifiée dans m9x9.xml)
+export const SQUARE9_LAYOUT: number[][] = [
+  [69, 58, 26, 15, 75, 54, 42, 21, 0],
+  [49, 38, 27, 5, 65, 53, 32, 11, 80],
+  [39, 7, 6, 66, 55, 33, 12, 72, 60],
+  [59, 28, 16, 76, 45, 43, 22, 1, 70],
+  [19, 18, 77, 56, 44, 23, 2, 71, 50],
+  [29, 17, 67, 46, 24, 13, 73, 61, 40],
+  [8, 78, 57, 36, 34, 3, 63, 51, 30],
+  [9, 68, 47, 35, 14, 74, 52, 41, 20],
+  [79, 48, 37, 25, 4, 64, 62, 31, 10],
+];
