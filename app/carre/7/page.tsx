@@ -2,14 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import GridCell from "@/components/GridCell";
+import SquareGrid from "@/components/SquareGrid";
+import NumeralToggle from "@/components/NumeralToggle";
 import { carre7, SQUARE7_LAYOUT, type Square7 } from "@/lib/wafq";
+import type { NumeralSystem } from "@/lib/numerals";
 
 export default function Carre7Page() {
   const [base, setBase] = useState("");
   const [base2, setBase2] = useState(""); // base = 7*(x-3)
   const [square, setSquare] = useState<Square7 | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [numerals, setNumerals] = useState<NumeralSystem>("latin");
 
   function handleCompute() {
     setError(null);
@@ -75,12 +78,17 @@ export default function Carre7Page() {
         </div>
 
         {square && (
-          <div className="mt-10 animate-fade-in">
-            <div className="grid grid-cols-7 gap-1.5 max-w-xl mx-auto">
-              {SQUARE7_LAYOUT.flat().map((idx, i) => (
-                <GridCell key={i} value={square.t[idx]} filled />
-              ))}
+          <div className="mt-10 animate-fade-in space-y-4">
+            <div className="flex justify-center">
+              <NumeralToggle value={numerals} onChange={setNumerals} />
             </div>
+            <SquareGrid
+              layout={SQUARE7_LAYOUT}
+              getValue={(idx) => square.t[idx]}
+              numerals={numerals}
+              gap="gap-1.5"
+              maxWidth="max-w-xl"
+            />
           </div>
         )}
       </div>

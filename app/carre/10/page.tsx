@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import GridCell from "@/components/GridCell";
+import SquareGrid from "@/components/SquareGrid";
+import NumeralToggle from "@/components/NumeralToggle";
 import { carre10, SQUARE10_LAYOUT, type Square10 } from "@/lib/wafq";
+import type { NumeralSystem } from "@/lib/numerals";
 
 const MIN_VALUE = 495;
 
@@ -11,6 +13,7 @@ export default function Carre10Page() {
   const [base, setBase] = useState("");
   const [square, setSquare] = useState<Square10 | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [numerals, setNumerals] = useState<NumeralSystem>("latin");
 
   function handleCompute() {
     setError(null);
@@ -79,12 +82,17 @@ export default function Carre10Page() {
         </div>
 
         {square && (
-          <div className="mt-10 animate-fade-in">
-            <div className="grid grid-cols-10 gap-1 max-w-2xl mx-auto">
-              {SQUARE10_LAYOUT.flat().map((idx, i) => (
-                <GridCell key={i} value={square.t[idx]} filled />
-              ))}
+          <div className="mt-10 animate-fade-in space-y-4">
+            <div className="flex justify-center">
+              <NumeralToggle value={numerals} onChange={setNumerals} />
             </div>
+            <SquareGrid
+              layout={SQUARE10_LAYOUT}
+              getValue={(idx) => square.t[idx]}
+              numerals={numerals}
+              gap="gap-1"
+              maxWidth="max-w-2xl"
+            />
           </div>
         )}
       </div>

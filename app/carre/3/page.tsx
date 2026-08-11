@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import GridCell from "@/components/GridCell";
+import SquareGrid from "@/components/SquareGrid";
+import NumeralToggle from "@/components/NumeralToggle";
 import { wilaya, ghazaly, bayt, SQUARE3_LAYOUT, type Square3 } from "@/lib/wafq";
+import type { NumeralSystem } from "@/lib/numerals";
 
 type Mode = "wilaya" | "ghazaly" | "bayt";
 
@@ -17,6 +19,7 @@ export default function Carre3Page() {
   const [mode, setMode] = useState<Mode>("ghazaly");
   const [square, setSquare] = useState<Square3 | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [numerals, setNumerals] = useState<NumeralSystem>("latin");
 
   // Wilaya
   const [wE2, setWE2] = useState("8");
@@ -135,12 +138,17 @@ export default function Carre3Page() {
 
         {/* Résultat */}
         {square && (
-          <div className="mt-10 animate-fade-in">
-            <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
-              {SQUARE3_LAYOUT.flat().map((key, i) => (
-                <GridCell key={i} value={square[key]} filled />
-              ))}
+          <div className="mt-10 animate-fade-in space-y-4">
+            <div className="flex justify-center">
+              <NumeralToggle value={numerals} onChange={setNumerals} />
             </div>
+            <SquareGrid
+              layout={SQUARE3_LAYOUT}
+              getValue={(key) => square[key]}
+              numerals={numerals}
+              gap="gap-3"
+              maxWidth="max-w-xs"
+            />
           </div>
         )}
       </div>

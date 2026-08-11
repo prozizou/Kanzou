@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import GridCell from "@/components/GridCell";
+import SquareGrid from "@/components/SquareGrid";
+import NumeralToggle from "@/components/NumeralToggle";
 import {
   carre5Base,
   carre5Askandria,
   SQUARE5_LAYOUT,
   type Square5,
 } from "@/lib/wafq";
+import type { NumeralSystem } from "@/lib/numerals";
 
 type Mode = "base" | "askandria";
 
@@ -21,6 +23,7 @@ export default function Carre5Page() {
   const [mode, setMode] = useState<Mode>("base");
   const [square, setSquare] = useState<Square5 | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [numerals, setNumerals] = useState<NumeralSystem>("latin");
 
   // Mode Base
   const [base, setBase] = useState("");
@@ -143,12 +146,18 @@ export default function Carre5Page() {
         </div>
 
         {square && (
-          <div className="mt-10 animate-fade-in">
-            <div className="grid grid-cols-5 gap-2 max-w-md mx-auto">
-              {SQUARE5_LAYOUT.flat().map((idx, i) => (
-                <GridCell key={i} value={square.t[idx]} filled={square.t[idx] !== null} />
-              ))}
+          <div className="mt-10 animate-fade-in space-y-4">
+            <div className="flex justify-center">
+              <NumeralToggle value={numerals} onChange={setNumerals} />
             </div>
+            <SquareGrid
+              layout={SQUARE5_LAYOUT}
+              getValue={(idx) => square.t[idx]}
+              getFilled={(idx) => square.t[idx] !== null}
+              numerals={numerals}
+              gap="gap-2"
+              maxWidth="max-w-md"
+            />
             {square.total !== undefined && (
               <p className="mt-4 text-center font-mono text-sm text-muted">
                 Tot: {square.total}
