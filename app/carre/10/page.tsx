@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import SquareGrid from "@/components/SquareGrid";
 import NumeralToggle from "@/components/NumeralToggle";
+import TextScaleSlider from "@/components/TextScaleSlider";
 import { carre10, SQUARE10_LAYOUT, type Square10 } from "@/lib/wafq";
 import type { NumeralSystem } from "@/lib/numerals";
 
@@ -14,6 +15,7 @@ export default function Carre10Page() {
   const [square, setSquare] = useState<Square10 | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [numerals, setNumerals] = useState<NumeralSystem>("latin");
+  const [scale, setScale] = useState(1);
 
   function handleCompute() {
     setError(null);
@@ -83,13 +85,15 @@ export default function Carre10Page() {
 
         {square && (
           <div className="mt-10 animate-fade-in space-y-4">
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-6">
               <NumeralToggle value={numerals} onChange={setNumerals} />
+              <TextScaleSlider value={scale} onChange={setScale} />
             </div>
             <SquareGrid
               layout={SQUARE10_LAYOUT}
               getValue={(idx) => square.t[idx]}
               numerals={numerals}
+              scale={scale}
               gap="gap-1"
               maxWidth="max-w-2xl"
             />
