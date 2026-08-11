@@ -45,10 +45,11 @@ export default function Carre9Page() {
         </h1>
 
         <p className="mt-3 max-w-md text-sm text-muted leading-relaxed">
-          9 cases restent vides ci-dessous : dans l'app d'origine, leur
-          calcul n'a jamais été implémenté (le code s'arrête avec un
-          commentaire "//KASR"). Elles sont affichées en gris plutôt
-          qu'avec une valeur inventée.
+          Dans l'app d'origine, 9 cases n'étaient jamais calculées (le code
+          s'arrête avec un commentaire "//KASR"). Elles sont complétées ici
+          en appliquant la règle du carré magique : chaque ligne doit
+          sommer au nombre entré, donc la case manquante d'une ligne vaut
+          ce nombre moins la somme des 8 autres cases de la même ligne.
         </p>
 
         <div className="mt-8 space-y-4">
