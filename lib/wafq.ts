@@ -376,17 +376,21 @@ export interface Square9 {
 }
 
 /**
- * Carré 9x9 : une seule valeur de base (minimum 360) -> ne remplit
- * QUE les 72 premières cases.
+ * Carré 9x9 : une seule valeur de base (minimum 360).
  *
- * IMPORTANT : dans M9x9Activity.java, le code s'arrête après
- * textview72 avec un commentaire "//KASR" et rien d'autre — les 9
- * dernières cases (textview73 à textview81) sont déclarées et liées
- * (findViewById) mais ne sont JAMAIS calculées dans le code source.
- * Ce n'est pas un choix de conception : ça ressemble à un
- * développement laissé inachevé dans l'app d'origine. Plutôt que
- * d'inventer une formule pour ces 9 cases, je les laisse vides ici,
- * fidèle à ce que fait réellement l'app Android.
+ * Les 72 premières cases suivent la même formule linéaire que les
+ * autres carrés. Dans M9x9Activity.java, le code s'arrête après
+ * textview72 avec un commentaire "//KASR" — les 9 dernières cases
+ * (textview73 à textview81) sont déclarées et liées (findViewById)
+ * mais ne sont JAMAIS calculées dans le code source d'origine
+ * (développement laissé inachevé).
+ *
+ * Complétées ici avec la même logique que le reste du carré magique :
+ * chaque ligne de `SQUARE9_LAYOUT` contient exactement UNE de ces 9
+ * cases manquantes, et chaque ligne d'un carré magique doit sommer à
+ * la valeur entrée (base). La case manquante de chaque ligne vaut donc
+ * la différence entre "base" et la somme des 8 autres cases (la
+ * "cage" horizontale) de cette même ligne.
  * (M9x9Activity.java : bouton "imageview1", offset=360, div=9)
  */
 export function carre9(base: number): Square9 {
@@ -395,8 +399,18 @@ export function carre9(base: number): Square9 {
     t.push(trunc((base - 360) / 9 + i));
   }
   for (let i = 72; i < 81; i++) {
-    t.push(null); // jamais calculées dans le code d'origine
+    t.push(null); // rempli ci-dessous via la somme de la ligne
   }
+
+  for (const row of SQUARE9_LAYOUT) {
+    const missing = row.find((idx) => idx >= 72);
+    if (missing === undefined) continue;
+    const sumRest = row
+      .filter((idx) => idx !== missing)
+      .reduce((acc, idx) => acc + (t[idx] as number), 0);
+    t[missing] = trunc(base - sumRest);
+  }
+
   return { t };
 }
 
