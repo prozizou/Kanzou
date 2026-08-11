@@ -8,7 +8,7 @@
  * Pour publier une nouvelle version des fichiers mis en cache, INCRÉMENTER
  * CACHE_VERSION ci-dessous : les anciens caches sont purgés à l'activation.
  */
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const CACHE_NAME = `al-kanzou-${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
