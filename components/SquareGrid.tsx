@@ -15,6 +15,7 @@ export default function SquareGrid<T>({
   getValue,
   getFilled,
   numerals,
+  scale = 1,
   gap = "gap-1.5",
   maxWidth = "max-w-2xl",
 }: {
@@ -22,6 +23,8 @@ export default function SquareGrid<T>({
   getValue: (key: T) => string | number | null;
   getFilled?: (key: T) => boolean;
   numerals: NumeralSystem;
+  /** Multiplicateur manuel de taille de texte, voir TextScaleSlider. */
+  scale?: number;
   gap?: string;
   maxWidth?: string;
 }) {
@@ -37,6 +40,7 @@ export default function SquareGrid<T>({
           key={i}
           value={formatNumeral(getValue(key), numerals)}
           filled={getFilled ? getFilled(key) : true}
+          scale={scale}
         />
       ))}
     </div>
