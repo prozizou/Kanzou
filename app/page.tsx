@@ -30,7 +30,8 @@ export default function HomePage() {
 
         <p className="mt-10 text-xs text-muted">
           Les huit tailles sont couvertes — chacune reprend fidèlement
-          sa formule d'origine (ou son absence, pour le 10×10).
+          sa formule d'origine, sauf le 10×10 (jamais implémenté dans
+          l'app d'origine) qui utilise un carré magique de référence.
         </p>
       </div>
     </main>

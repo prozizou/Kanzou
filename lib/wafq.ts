@@ -426,3 +426,59 @@ export const SQUARE9_LAYOUT: number[][] = [
   [9, 68, 47, 35, 14, 74, 52, 41, 20],
   [79, 48, 37, 25, 4, 64, 62, 31, 10],
 ];
+
+// ---------------------------------------------------------------------
+// 10x10
+// ---------------------------------------------------------------------
+
+export interface Square10 {
+  t: number[]; // t[0]..t[99], en ordre visuel ligne par ligne
+}
+
+const OFFSET_10 = 495; // = 10 x (10² - 1) / 2, même formule que les autres tailles
+
+/**
+ * Carré 10x10 : contrairement aux tailles 3 à 9, M10x10Activity.java
+ * ne contient AUCUNE formule (le clic sur le bouton ne fait rien —
+ * développement jamais commencé). Il n'y a donc rien à porter
+ * fidèlement depuis l'app d'origine.
+ *
+ * Carré de référence ci-dessous fourni par l'utilisateur : un carré
+ * magique complet et valide (vérifié : les 10 lignes, les 10
+ * colonnes ET les deux diagonales somment toutes à 505, avec les 100
+ * entiers de 1 à 100 utilisés une seule fois chacun).
+ *
+ * Généralisation à une valeur de base arbitraire : ajouter la même
+ * constante à chaque case d'un carré magique préserve la propriété
+ * magique (chaque ligne/colonne gagne 10 fois cette constante). On
+ * calcule donc k = trunc((base - 495) / 10) et on décale chaque
+ * valeur de référence de (k - 1) : base = 505 restitue exactement le
+ * carré de référence (k = 1), base = 495 donne le carré 0..99 (k = 0).
+ * C'est le même principe que carre8/carre9 (offset = N x (N² - 1) / 2).
+ */
+const SQUARE10_REFERENCE: number[][] = [
+  [92, 98, 4, 85, 86, 17, 23, 79, 10, 11],
+  [99, 80, 81, 87, 93, 24, 5, 6, 12, 18],
+  [1, 7, 88, 19, 25, 76, 82, 13, 94, 100],
+  [8, 14, 20, 21, 2, 83, 89, 95, 96, 77],
+  [15, 16, 22, 3, 9, 90, 91, 97, 78, 84],
+  [67, 73, 54, 60, 61, 42, 48, 29, 35, 36],
+  [74, 55, 56, 62, 68, 49, 30, 31, 37, 43],
+  [51, 57, 63, 69, 75, 26, 32, 38, 44, 50],
+  [58, 64, 70, 71, 52, 33, 39, 45, 46, 27],
+  [40, 41, 47, 28, 34, 65, 66, 72, 53, 59],
+];
+
+export function carre10(base: number): Square10 {
+  const k = trunc((base - OFFSET_10) / 10);
+  const t = SQUARE10_REFERENCE.flat().map((v) => trunc(v - 1 + k));
+  return { t };
+}
+
+// Le carré de référence est déjà donné dans l'ordre visuel (ligne par
+// ligne) : la disposition est donc l'identité, contrairement aux
+// autres tailles qui reproduisent un ordre de vues XML hérité de
+// l'app Android d'origine.
+export const SQUARE10_LAYOUT: number[][] = Array.from({ length: 10 }, (_, r) =>
+  Array.from({ length: 10 }, (_, c) => r * 10 + c)
+);
