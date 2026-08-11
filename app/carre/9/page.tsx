@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import GridCell from "@/components/GridCell";
+import SquareGrid from "@/components/SquareGrid";
+import NumeralToggle from "@/components/NumeralToggle";
 import { carre9, SQUARE9_LAYOUT, type Square9 } from "@/lib/wafq";
+import type { NumeralSystem } from "@/lib/numerals";
 
 const MIN_VALUE = 360;
 
@@ -11,6 +13,7 @@ export default function Carre9Page() {
   const [base, setBase] = useState("");
   const [square, setSquare] = useState<Square9 | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [numerals, setNumerals] = useState<NumeralSystem>("latin");
 
   function handleCompute() {
     setError(null);
@@ -77,12 +80,18 @@ export default function Carre9Page() {
         </div>
 
         {square && (
-          <div className="mt-10 animate-fade-in">
-            <div className="grid grid-cols-9 gap-1 max-w-2xl mx-auto">
-              {SQUARE9_LAYOUT.flat().map((idx, i) => (
-                <GridCell key={i} value={square.t[idx]} filled={square.t[idx] !== null} />
-              ))}
+          <div className="mt-10 animate-fade-in space-y-4">
+            <div className="flex justify-center">
+              <NumeralToggle value={numerals} onChange={setNumerals} />
             </div>
+            <SquareGrid
+              layout={SQUARE9_LAYOUT}
+              getValue={(idx) => square.t[idx]}
+              getFilled={(idx) => square.t[idx] !== null}
+              numerals={numerals}
+              gap="gap-1"
+              maxWidth="max-w-2xl"
+            />
           </div>
         )}
       </div>

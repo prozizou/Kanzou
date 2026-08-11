@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import GridCell from "@/components/GridCell";
+import SquareGrid from "@/components/SquareGrid";
+import NumeralToggle from "@/components/NumeralToggle";
 import { carre4, SQUARE4_LAYOUT, type Square4 } from "@/lib/wafq";
+import type { NumeralSystem } from "@/lib/numerals";
 
 export default function Carre4Page() {
   const [base, setBase] = useState("");
   const [square, setSquare] = useState<Square4 | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [numerals, setNumerals] = useState<NumeralSystem>("latin");
 
   function handleCompute() {
     setError(null);
@@ -55,12 +58,17 @@ export default function Carre4Page() {
         </div>
 
         {square && (
-          <div className="mt-10 animate-fade-in">
-            <div className="grid grid-cols-4 gap-3 max-w-sm mx-auto">
-              {SQUARE4_LAYOUT.flat().map((idx, i) => (
-                <GridCell key={i} value={square.t[idx]} filled />
-              ))}
+          <div className="mt-10 animate-fade-in space-y-4">
+            <div className="flex justify-center">
+              <NumeralToggle value={numerals} onChange={setNumerals} />
             </div>
+            <SquareGrid
+              layout={SQUARE4_LAYOUT}
+              getValue={(idx) => square.t[idx]}
+              numerals={numerals}
+              gap="gap-3"
+              maxWidth="max-w-sm"
+            />
           </div>
         )}
       </div>

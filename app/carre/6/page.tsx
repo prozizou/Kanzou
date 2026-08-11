@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import GridCell from "@/components/GridCell";
+import SquareGrid from "@/components/SquareGrid";
+import NumeralToggle from "@/components/NumeralToggle";
 import { carre6, SQUARE6_LAYOUT, type Square6 } from "@/lib/wafq";
+import type { NumeralSystem } from "@/lib/numerals";
 
 export default function Carre6Page() {
   const [base, setBase] = useState("");
   const [square, setSquare] = useState<Square6 | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [numerals, setNumerals] = useState<NumeralSystem>("latin");
 
   function handleCompute() {
     setError(null);
@@ -55,12 +58,17 @@ export default function Carre6Page() {
         </div>
 
         {square && (
-          <div className="mt-10 animate-fade-in">
-            <div className="grid grid-cols-6 gap-2 max-w-lg mx-auto">
-              {SQUARE6_LAYOUT.flat().map((idx, i) => (
-                <GridCell key={i} value={square.t[idx]} filled />
-              ))}
+          <div className="mt-10 animate-fade-in space-y-4">
+            <div className="flex justify-center">
+              <NumeralToggle value={numerals} onChange={setNumerals} />
             </div>
+            <SquareGrid
+              layout={SQUARE6_LAYOUT}
+              getValue={(idx) => square.t[idx]}
+              numerals={numerals}
+              gap="gap-2"
+              maxWidth="max-w-lg"
+            />
           </div>
         )}
       </div>

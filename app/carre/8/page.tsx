@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import GridCell from "@/components/GridCell";
+import SquareGrid from "@/components/SquareGrid";
+import NumeralToggle from "@/components/NumeralToggle";
 import { carre8, SQUARE8_LAYOUT, type Square8 } from "@/lib/wafq";
+import type { NumeralSystem } from "@/lib/numerals";
 
 const MIN_VALUE = 252;
 
@@ -11,6 +13,7 @@ export default function Carre8Page() {
   const [base, setBase] = useState("");
   const [square, setSquare] = useState<Square8 | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [numerals, setNumerals] = useState<NumeralSystem>("latin");
 
   function handleCompute() {
     setError(null);
@@ -69,12 +72,17 @@ export default function Carre8Page() {
         </div>
 
         {square && (
-          <div className="mt-10 animate-fade-in">
-            <div className="grid grid-cols-8 gap-1.5 max-w-2xl mx-auto">
-              {SQUARE8_LAYOUT.flat().map((idx, i) => (
-                <GridCell key={i} value={square.t[idx]} filled />
-              ))}
+          <div className="mt-10 animate-fade-in space-y-4">
+            <div className="flex justify-center">
+              <NumeralToggle value={numerals} onChange={setNumerals} />
             </div>
+            <SquareGrid
+              layout={SQUARE8_LAYOUT}
+              getValue={(idx) => square.t[idx]}
+              numerals={numerals}
+              gap="gap-1.5"
+              maxWidth="max-w-2xl"
+            />
           </div>
         )}
       </div>
