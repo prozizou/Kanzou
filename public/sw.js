@@ -21,6 +21,7 @@ const PRECACHE_URLS = [
   "/carre/8",
   "/carre/9",
   "/carre/10",
+  "/carre/11",
   "/manifest.json",
   "/icon.svg",
 ];
