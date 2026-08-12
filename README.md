@@ -66,13 +66,27 @@ ne pas deviner les calculs.
   vide et `Double.parseDouble` n'apparaît nulle part dans le fichier.
   La page `/carre/10` documente cette lacune plutôt que d'inventer une
   formule à 100 cases.
+- **Hatim triangulaire (`/triangle`)** : absent de l'app Android
+  d'origine, pas de code Java à porter. Reconstruit et vérifié à
+  partir d'un exemple fourni par l'utilisateur (sommet=200, base
+  gauche=150, base droite=250, D=644) : un triangle extérieur dont le
+  triangle médian intérieur relie les milieux des 3 côtés, où les 6
+  lignes droites du diagramme (3 côtés extérieurs + 3 côtés
+  intérieurs) somment toutes exactement à D. `hatimTriangulaire()`
+  généralise cette structure à 4 valeurs libres (D, sommet, base
+  gauche, base droite) plutôt que de figer l'exemple fourni.
 
 ## Architecture
 
 - `lib/wafq.ts` — moteur de calcul pur (aucune dépendance UI), une
   fonction par mode.
-- `components/GridCell.tsx`, `components/PorteCarre.tsx` — UI partagée.
+- `components/GridCell.tsx`, `components/PorteCarre.tsx` — UI partagée
+  aux carrés ; `components/MagicDiamond.tsx` et
+  `components/HatimTriangleGrid.tsx` — rendu SVG dédié aux formes
+  hors grille (losange, triangle).
 - `app/carre/3/page.tsx`, `app/carre/4/page.tsx` — pages dédiées
   (client components, formulaire + calcul).
 - `app/carre/[size]/page.tsx` — placeholder pour les tailles non
   encore portées.
+- `app/triangle/page.tsx` — Hatim triangulaire (formulaire à 4 valeurs
+  + rendu SVG).
