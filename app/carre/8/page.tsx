@@ -10,6 +10,8 @@ import MagicDiamond from "@/components/MagicDiamond";
 import {
   carre8,
   diamond8,
+  isValidDiamond8Base,
+  DIAMOND8_STEP,
   SQUARE8_LAYOUT,
   type Square8,
   type Diamond8,
@@ -84,6 +86,18 @@ export default function Carre8Page() {
         setError(`La valeur doit être supérieure à ${DIAMOND_MIN_VALUE}.`);
         return;
       }
+      if (!isValidDiamond8Base(b)) {
+        setDiamond(null);
+        const lower = b - ((b - DIAMOND_MIN_VALUE) % DIAMOND8_STEP);
+        const upper = lower + DIAMOND8_STEP;
+        setError(
+          `Ce nombre ne donne pas des rangées exactement égales à ${b} ` +
+            `(le losange n'a que 32 cases pour ${DIAMOND8_STEP} termes par rangée : ` +
+            `seul un nombre de la forme ${DIAMOND_MIN_VALUE} + ${DIAMOND8_STEP}×n convient). ` +
+            `Essayez ${lower} ou ${upper}.`
+        );
+        return;
+      }
       setDiamond(diamond8(b));
     }
   }
@@ -123,7 +137,10 @@ export default function Carre8Page() {
             droite-à-gauche et 2 colonnes somment toutes au nombre entré ;
             les losanges intérieurs concentriques somment à sa moitié.
             Chaque case du diagramme est coupée en deux : un nombre
-            "extérieur" (haut) et un nombre "intérieur" (bas).
+            "extérieur" (haut) et un nombre "intérieur" (bas). Ici, chaque
+            case appartient à une rangée des deux sens à la fois, donc seul
+            un nombre de la forme {DIAMOND_MIN_VALUE} + {DIAMOND8_STEP}×n
+            donne des rangées exactement égales au nombre entré.
           </p>
         )}
 
@@ -144,7 +161,9 @@ export default function Carre8Page() {
           ) : (
             <label className="block">
               <span className="block text-xs text-muted mb-1">
-                Nombre (supérieur à {DIAMOND_MIN_VALUE})
+                Nombre (supérieur à {DIAMOND_MIN_VALUE}, de la forme{" "}
+                {DIAMOND_MIN_VALUE} + {DIAMOND8_STEP}×n — ex. {DIAMOND_MIN_VALUE},{" "}
+                {DIAMOND_MIN_VALUE + DIAMOND8_STEP}, {DIAMOND_MIN_VALUE + 2 * DIAMOND8_STEP}…)
               </span>
               <input
                 type="number"

@@ -383,16 +383,14 @@ export interface Diamond8 {
 }
 
 const DIAMOND8_OFFSET = 124; // = 8 x (32 - 1) / 2, même formule que les autres tailles
+export const DIAMOND8_STEP = 8;
 
 /**
  * Losange magique fourni par l'utilisateur : 32 nombres (1 à 32),
  * disposés en losanges eux-mêmes coupés en deux triangles. Vérifié :
  * les 4 rangées "gauche à droite", les 4 rangées "droite à gauche" et
  * les 2 colonnes somment toutes à 132 ; les carrés/losanges intérieurs
- * concentriques (coins opposés) somment tous à 66 (la moitié — cette
- * propriété se déduit automatiquement du décalage uniforme ci-dessous,
- * puisque 4 valeurs décalées de (k-1) chacune font varier leur somme
- * de 4 x (k-1), et 66 + 4(k-1) = base/2 exactement).
+ * concentriques (coins opposés) somment tous à 66 (la moitié).
  *
  * Structure : chaque rangée "gauche à droite" (4 au total, indexées
  * p=0..3) et chaque rangée "droite à gauche" (4 au total, indexées
@@ -404,7 +402,27 @@ const DIAMOND8_OFFSET = 124; // = 8 x (32 - 1) / 2, même formule que les autres
  * uniforme, comme pour carre10/carre11 : k = trunc((base - 124) / 8),
  * chaque nombre = valeur de référence + (k - 1). base = 132 restitue
  * exactement le losange fourni (k = 1).
+ *
+ * IMPORTANT — contrairement aux carrés N×N (où chaque case n'appartient
+ * qu'à UNE rangée), ici chaque case appartient à la fois à une rangée
+ * "gauche à droite" ET à une rangée "droite à gauche". Le correctif
+ * "dernières cases calculées par différence" utilisé pour le 9x9 (une
+ * seule case manquante par rangée) ne s'applique donc pas : tenter de
+ * calculer 8 cases par différence (une par rangée) crée une dépendance
+ * circulaire (la case manquante d'une rangée "gauche à droite" dépend
+ * alors de la case manquante d'une rangée "droite à gauche" qui elle-
+ * même en dépend), impossible à résoudre par simple soustraction.
+ *
+ * Le décalage uniforme ne donne donc des sommes EXACTEMENT égales à
+ * base que si (base - 124) est un multiple de 8 (voir
+ * isValidDiamond8Base ci-dessous) — sinon `trunc()` introduit un écart
+ * (ex. base=241 → sommes réelles de 236, pas 241). L'UI doit donc
+ * n'accepter que ces valeurs plutôt que d'afficher un losange dont les
+ * rangées ne totalisent pas le nombre entré.
  */
+export function isValidDiamond8Base(base: number): boolean {
+  return Number.isInteger(base) && (base - DIAMOND8_OFFSET) % DIAMOND8_STEP === 0;
+}
 const DIAMOND8_REFERENCE: [number, number][][] = [
   // p=0
   [
