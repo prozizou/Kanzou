@@ -10,6 +10,7 @@ import MagicDiamond from "@/components/MagicDiamond";
 import {
   carre8,
   diamond8,
+  diamond8ToRows,
   isValidDiamond8Base,
   DIAMOND8_STEP,
   SQUARE8_LAYOUT,
@@ -209,10 +210,16 @@ export default function Carre8Page() {
 
         {mode === "losange" && diamond && (
           <div className="mt-10 animate-fade-in space-y-4">
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-6">
               <NumeralToggle value={numerals} onChange={setNumerals} />
+              <TextScaleSlider value={scale} onChange={setScale} />
+              <ExportWordButton
+                title="Al Kanzou — Losange magique"
+                rows={diamond8ToRows(diamond)}
+                fileName="al-kanzou-losange-magique"
+              />
             </div>
-            <MagicDiamond cells={diamond.cells} numerals={numerals} />
+            <MagicDiamond cells={diamond.cells} numerals={numerals} scale={scale} />
           </div>
         )}
       </div>
