@@ -83,12 +83,17 @@ ne pas deviner les calculs.
   D à [12, 18] pour une solution 100% unique avec les chiffres 1 à 9 —
   et une recherche exhaustive montre que seuls D = 12, 14, 16 et 18 ont
   effectivement une solution (exactement les 4 exemples de l'image de
-  référence d'origine). `hatimTriangulaire()` généralise maintenant ces
-  3 solutions de référence (une par reste modulo 3) à une valeur D
-  arbitraire par décalage uniforme — même principe que `carre10()` /
-  `carre11()` / `diamond8()` — ce qui garantit les 9 valeurs toujours
-  distinctes et les 6 lignes toujours égales à D, quelle que soit la
-  valeur entrée.
+  référence d'origine). L'utilisateur a ensuite fourni cette image en
+  haute résolution : les 4 triangles D:12/14/16/18 y sont reproduits
+  EXACTEMENT dans `hatimTriangulaire()` (table `HATIM_TRIANGLE_EXACT`),
+  chiffre pour chiffre — au passage, vérifié que D:18 est le complément
+  exact de D:12 et D:16 celui de D:14 (chaque case = 10 − la case
+  correspondante, conséquence directe de Souter = 15). Pour un D hors
+  de ces 4 valeurs, généralisation par décalage uniforme d'une des 3
+  solutions de référence (une par reste modulo 3) — même principe que
+  `carre10()` / `carre11()` / `diamond8()` — ce qui garantit les 9
+  valeurs toujours distinctes et les 6 lignes toujours égales à D,
+  quelle que soit la valeur entrée.
 
 ## Architecture
 
