@@ -5,7 +5,13 @@ import { formatNumeral, type NumeralSystem } from "@/lib/numerals";
 
 const UNIT_X = 56;
 const UNIT_Y = 40;
-const PAD = 24;
+const PAD_X = 24;
+// Un peu plus de marge en haut qu'en bas : les coins des cases du
+// haut du losange dépassent d'une unité (Y = -1) au-dessus du sommet
+// logique — sans cette marge, la pointe "1" débordait du viewBox et
+// chevauchait le contenu au-dessus.
+const PAD_TOP = 32;
+const PAD_BOTTOM = 24;
 
 type Point = { sx: number; sy: number };
 
@@ -32,9 +38,13 @@ export default function MagicDiamond({
   cells: DiamondCell[];
   numerals: NumeralSystem;
 }) {
+  // Les coordonnées (x, y) des sommets des cases vont de -4 à 4 en X
+  // et de -1 à 7 en Y (les coins débordent d'une unité de part et
+  // d'autre des centres de cases, qui vont de 0 à 6) : on décale donc
+  // de +4 et +1 pour ramener l'origine du losange dans le viewBox.
   const toScreen = (x: number, y: number): Point => ({
-    sx: x * UNIT_X + 4 * UNIT_X + PAD,
-    sy: y * UNIT_Y + PAD,
+    sx: (x + 4) * UNIT_X + PAD_X,
+    sy: (y + 1) * UNIT_Y + PAD_TOP,
   });
 
   const centroid = (pts: Point[]): Point => ({
@@ -49,13 +59,13 @@ export default function MagicDiamond({
     sy: from.sy + (to.sy - from.sy) * t,
   });
 
-  const width = 8 * UNIT_X + PAD * 2;
-  const height = 8 * UNIT_Y + PAD * 2;
+  const width = 8 * UNIT_X + PAD_X * 2;
+  const height = 8 * UNIT_Y + PAD_TOP + PAD_BOTTOM;
 
   return (
     <svg
       viewBox={`0 0 ${width} ${height}`}
-      className="mx-auto block w-full max-w-2xl"
+      className="mx-auto block w-full"
       role="img"
       aria-label="Losange magique"
     >
