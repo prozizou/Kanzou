@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import SquareGrid from "@/components/SquareGrid";
+import SquareGrid, { squareToRows } from "@/components/SquareGrid";
 import NumeralToggle from "@/components/NumeralToggle";
 import TextScaleSlider from "@/components/TextScaleSlider";
+import ExportWordButton from "@/components/ExportWordButton";
 import { carre6, SQUARE6_LAYOUT, type Square6 } from "@/lib/wafq";
 import type { NumeralSystem } from "@/lib/numerals";
 
@@ -64,6 +65,11 @@ export default function Carre6Page() {
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-6">
               <NumeralToggle value={numerals} onChange={setNumerals} />
               <TextScaleSlider value={scale} onChange={setScale} />
+              <ExportWordButton
+                title="Al Kanzou — Carré 6 × 6"
+                rows={squareToRows(SQUARE6_LAYOUT, (idx) => square.t[idx], numerals)}
+                fileName="al-kanzou-carre-6x6"
+              />
             </div>
             <SquareGrid
               layout={SQUARE6_LAYOUT}
