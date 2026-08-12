@@ -668,3 +668,82 @@ export function carre11(base: number): Square11 {
 export const SQUARE11_LAYOUT: number[][] = Array.from({ length: 11 }, (_, r) =>
   Array.from({ length: 11 }, (_, c) => r * 11 + c)
 );
+
+// ---------------------------------------------------------------------
+// Hatim triangulaire
+// ---------------------------------------------------------------------
+
+export interface HatimTriangle {
+  d: number;
+  sommet: number; // sommet du triangle extérieur (haut)
+  baseGauche: number; // coin bas-gauche
+  baseDroite: number; // coin bas-droit
+  gauche: number; // milieu du côté gauche (entre sommet et baseGauche)
+  droite: number; // milieu du côté droit (entre sommet et baseDroite)
+  bas: number; // milieu du côté bas (entre baseGauche et baseDroite)
+  centreHaut: number; // sommet du triangle intérieur (entre gauche et droite)
+  centreGauche: number; // coin bas-gauche du triangle intérieur (entre gauche et bas)
+  centreDroite: number; // coin bas-droit du triangle intérieur (entre droite et bas)
+}
+
+/**
+ * Hatim triangulaire "parfait" : absent de l'app Android d'origine
+ * (aucune Activity Java correspondante à porter). Reconstruit et
+ * vérifié à partir d'un exemple fourni par l'utilisateur (sommet=200,
+ * base gauche=150, base droite=250, D=644), où chacune des 6 lignes
+ * droites du diagramme — les 3 côtés du triangle extérieur ET les 3
+ * côtés du triangle médian intérieur — somme exactement à D :
+ *   200+294+150=644   200+194+250=644   150+244+250=644
+ *   294+156+194=644   294+106+244=644   194+206+244=644
+ *
+ * Le triangle est donc entièrement déterminé par 4 valeurs libres — D
+ * et les 3 sommets extérieurs — chaque case "milieu" valant D moins
+ * les deux cases à ses extrémités :
+ *   milieu d'un côté extérieur = D − les 2 sommets qu'il relie
+ *   sommet du triangle intérieur = D − les 2 milieux adjacents
+ */
+export function hatimTriangulaire(
+  d: number,
+  sommet: number,
+  baseGauche: number,
+  baseDroite: number
+): HatimTriangle {
+  const gauche = trunc(d - sommet - baseGauche);
+  const droite = trunc(d - sommet - baseDroite);
+  const bas = trunc(d - baseGauche - baseDroite);
+  const centreHaut = trunc(d - gauche - droite);
+  const centreGauche = trunc(d - gauche - bas);
+  const centreDroite = trunc(d - droite - bas);
+  return {
+    d,
+    sommet,
+    baseGauche,
+    baseDroite,
+    gauche,
+    droite,
+    bas,
+    centreHaut,
+    centreGauche,
+    centreDroite,
+  };
+}
+
+/**
+ * Grille rectangulaire (pour l'export Word), reproduisant la
+ * silhouette du triangle en 4 rangées, cases vides pour combler les
+ * coins non utilisés (même principe que diamond8ToRows) :
+ *   [   _   , sommet     ,    _     ]
+ *   [gauche , centreHaut , droite   ]
+ *   [centreGauche, _     , centreDroite]
+ *   [baseGauche, bas     , baseDroite]
+ */
+export function hatimTriangleToRows(
+  triangle: HatimTriangle
+): (number | null)[][] {
+  return [
+    [null, triangle.sommet, null],
+    [triangle.gauche, triangle.centreHaut, triangle.droite],
+    [triangle.centreGauche, null, triangle.centreDroite],
+    [triangle.baseGauche, triangle.bas, triangle.baseDroite],
+  ];
+}

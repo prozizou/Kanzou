@@ -1,3 +1,4 @@
+import Link from "next/link";
 import PorteCarre from "@/components/PorteCarre";
 
 const ACTIVE_SIZES = [3, 4, 5, 6, 7, 8, 9, 10, 11];
@@ -34,6 +35,20 @@ export default function HomePage() {
           implémentés dans l'app d'origine), qui utilisent un carré
           magique de référence.
         </p>
+
+        <h2 className="mt-14 font-display text-2xl text-parchment">
+          Autres formes
+        </h2>
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Link href="/triangle">
+            <div className="group relative flex flex-col justify-between rounded-lg border border-line p-5 h-32 transition-colors duration-200 hover:border-brass bg-surface">
+              <span className="font-mono text-xs text-muted">△</span>
+              <span className="font-display text-xl text-parchment group-hover:text-brass">
+                Hatim triangulaire
+              </span>
+            </div>
+          </Link>
+        </div>
       </div>
     </main>
   );
