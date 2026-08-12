@@ -6,37 +6,86 @@ import SquareGrid, { squareToRows } from "@/components/SquareGrid";
 import NumeralToggle from "@/components/NumeralToggle";
 import TextScaleSlider from "@/components/TextScaleSlider";
 import ExportWordButton from "@/components/ExportWordButton";
-import { carre8, SQUARE8_LAYOUT, type Square8 } from "@/lib/wafq";
+import MagicDiamond from "@/components/MagicDiamond";
+import {
+  carre8,
+  diamond8,
+  SQUARE8_LAYOUT,
+  type Square8,
+  type Diamond8,
+} from "@/lib/wafq";
 import type { NumeralSystem } from "@/lib/numerals";
 
+type Mode = "carre" | "losange";
+
+const MODE_LABELS: Record<Mode, string> = {
+  carre: "Carré (une valeur)",
+  losange: "Losange magique (32 nombres)",
+};
+
 const MIN_VALUE = 252;
+const DIAMOND_MIN_VALUE = 124;
 
 export default function Carre8Page() {
-  const [base, setBase] = useState("");
-  const [square, setSquare] = useState<Square8 | null>(null);
+  const [mode, setMode] = useState<Mode>("carre");
   const [error, setError] = useState<string | null>(null);
   const [numerals, setNumerals] = useState<NumeralSystem>("latin");
   const [scale, setScale] = useState(1);
 
+  // Mode "carre"
+  const [base, setBase] = useState("");
+  const [square, setSquare] = useState<Square8 | null>(null);
+
+  // Mode "losange"
+  const [diamondBase, setDiamondBase] = useState("");
+  const [diamond, setDiamond] = useState<Diamond8 | null>(null);
+
+  function handleModeChange(next: Mode) {
+    setMode(next);
+    setSquare(null);
+    setDiamond(null);
+    setError(null);
+  }
+
   function handleCompute() {
     setError(null);
-    if (base.trim() === "") {
-      setSquare(null);
-      setError("Champ vide.");
-      return;
+    if (mode === "carre") {
+      if (base.trim() === "") {
+        setSquare(null);
+        setError("Champ vide.");
+        return;
+      }
+      const b = Number(base);
+      if (Number.isNaN(b)) {
+        setSquare(null);
+        setError("Merci de renseigner un nombre valide.");
+        return;
+      }
+      if (b < MIN_VALUE) {
+        setSquare(null);
+        setError(`La valeur doit être supérieure à ${MIN_VALUE}.`);
+        return;
+      }
+      setSquare(carre8(b));
+    } else {
+      if (diamondBase.trim() === "") {
+        setDiamond(null);
+        setError("Champ vide.");
+        return;
+      }
+      const b = Number(diamondBase);
+      if (Number.isNaN(b)) {
+        setDiamond(null);
+        setError("Merci de renseigner un nombre valide.");
+        return;
+      }
+      if (b < DIAMOND_MIN_VALUE) {
+        setDiamond(null);
+        setError(`La valeur doit être supérieure à ${DIAMOND_MIN_VALUE}.`);
+        return;
+      }
+      setDiamond(diamond8(b));
     }
-    const b = Number(base);
-    if (Number.isNaN(b)) {
-      setSquare(null);
-      setError("Merci de renseigner un nombre valide.");
-      return;
-    }
-    if (b < MIN_VALUE) {
-      setSquare(null);
-      setError(`La valeur doit être supérieure à ${MIN_VALUE}.`);
-      return;
-    }
-    setSquare(carre8(b));
   }
 
   return (
@@ -50,19 +99,62 @@ export default function Carre8Page() {
           Carré 8 × 8
         </h1>
 
+        <div className="mt-8 flex flex-wrap gap-2">
+          {(Object.keys(MODE_LABELS) as Mode[]).map((m) => (
+            <button
+              key={m}
+              onClick={() => handleModeChange(m)}
+              className={[
+                "rounded-full border px-4 py-1.5 text-sm transition-colors",
+                mode === m
+                  ? "border-brass bg-brass/10 text-brass"
+                  : "border-line text-muted hover:text-parchment hover:border-parchment/40",
+              ].join(" ")}
+            >
+              {MODE_LABELS[m]}
+            </button>
+          ))}
+        </div>
+
+        {mode === "losange" && (
+          <p className="mt-4 max-w-md text-sm text-muted leading-relaxed">
+            Absent de l'app Android d'origine. Losange de 32 nombres fourni
+            par l'utilisateur : 4 rangées gauche-à-droite, 4 rangées
+            droite-à-gauche et 2 colonnes somment toutes au nombre entré ;
+            les losanges intérieurs concentriques somment à sa moitié.
+            Chaque case du diagramme est coupée en deux : un nombre
+            "extérieur" (haut) et un nombre "intérieur" (bas).
+          </p>
+        )}
+
         <div className="mt-8 space-y-4">
-          <label className="block">
-            <span className="block text-xs text-muted mb-1">
-              Nombre (supérieur à {MIN_VALUE})
-            </span>
-            <input
-              type="number"
-              inputMode="numeric"
-              value={base}
-              onChange={(e) => setBase(e.target.value)}
-              className="w-full rounded-md border border-line bg-surface px-3 py-2 text-parchment focus:border-brass"
-            />
-          </label>
+          {mode === "carre" ? (
+            <label className="block">
+              <span className="block text-xs text-muted mb-1">
+                Nombre (supérieur à {MIN_VALUE})
+              </span>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={base}
+                onChange={(e) => setBase(e.target.value)}
+                className="w-full rounded-md border border-line bg-surface px-3 py-2 text-parchment focus:border-brass"
+              />
+            </label>
+          ) : (
+            <label className="block">
+              <span className="block text-xs text-muted mb-1">
+                Nombre (supérieur à {DIAMOND_MIN_VALUE})
+              </span>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={diamondBase}
+                onChange={(e) => setDiamondBase(e.target.value)}
+                className="w-full rounded-md border border-line bg-surface px-3 py-2 text-parchment focus:border-brass"
+              />
+            </label>
+          )}
 
           <button
             onClick={handleCompute}
@@ -74,7 +166,7 @@ export default function Carre8Page() {
           {error && <p className="text-sm text-alert">{error}</p>}
         </div>
 
-        {square && (
+        {mode === "carre" && square && (
           <div className="mt-10 animate-fade-in space-y-4">
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-6">
               <NumeralToggle value={numerals} onChange={setNumerals} />
@@ -93,6 +185,15 @@ export default function Carre8Page() {
               gap="gap-1.5"
               maxWidth="max-w-2xl"
             />
+          </div>
+        )}
+
+        {mode === "losange" && diamond && (
+          <div className="mt-10 animate-fade-in space-y-4">
+            <div className="flex justify-center">
+              <NumeralToggle value={numerals} onChange={setNumerals} />
+            </div>
+            <MagicDiamond cells={diamond.cells} numerals={numerals} />
           </div>
         )}
       </div>

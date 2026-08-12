@@ -368,6 +368,92 @@ export const SQUARE8_LAYOUT: number[][] = [
 ];
 
 // ---------------------------------------------------------------------
+// Losange magique (mode additionnel du 8x8)
+// ---------------------------------------------------------------------
+
+export interface DiamondCell {
+  p: number; // 0..3 — index de la rangée "gauche à droite"
+  q: number; // 0..3 — index de la rangée "droite à gauche"
+  outer: number;
+  inner: number;
+}
+
+export interface Diamond8 {
+  cells: DiamondCell[]; // 16 cases (losanges), chacune 2 nombres = 32 nombres
+}
+
+const DIAMOND8_OFFSET = 124; // = 8 x (32 - 1) / 2, même formule que les autres tailles
+
+/**
+ * Losange magique fourni par l'utilisateur : 32 nombres (1 à 32),
+ * disposés en losanges eux-mêmes coupés en deux triangles. Vérifié :
+ * les 4 rangées "gauche à droite", les 4 rangées "droite à gauche" et
+ * les 2 colonnes somment toutes à 132 ; les carrés/losanges intérieurs
+ * concentriques (coins opposés) somment tous à 66 (la moitié — cette
+ * propriété se déduit automatiquement du décalage uniforme ci-dessous,
+ * puisque 4 valeurs décalées de (k-1) chacune font varier leur somme
+ * de 4 x (k-1), et 66 + 4(k-1) = base/2 exactement).
+ *
+ * Structure : chaque rangée "gauche à droite" (4 au total, indexées
+ * p=0..3) et chaque rangée "droite à gauche" (4 au total, indexées
+ * q=0..3) se croisent en 16 cases, chaque case portant exactement 2
+ * des 32 nombres (l'un "extérieur", l'un "intérieur" du losange qui
+ * la représente) — retrouvé en croisant les 8 équations fournies.
+ *
+ * Généralisation à une valeur de base arbitraire par décalage
+ * uniforme, comme pour carre10/carre11 : k = trunc((base - 124) / 8),
+ * chaque nombre = valeur de référence + (k - 1). base = 132 restitue
+ * exactement le losange fourni (k = 1).
+ */
+const DIAMOND8_REFERENCE: [number, number][][] = [
+  // p=0
+  [
+    [1, 24],
+    [11, 30],
+    [23, 2],
+    [9, 32],
+  ],
+  // p=1
+  [
+    [28, 13],
+    [4, 21],
+    [12, 29],
+    [17, 8],
+  ],
+  // p=2
+  [
+    [31, 10],
+    [6, 19],
+    [14, 27],
+    [20, 5],
+  ],
+  // p=3
+  [
+    [7, 18],
+    [25, 16],
+    [3, 22],
+    [15, 26],
+  ],
+];
+
+export function diamond8(base: number): Diamond8 {
+  const k = trunc((base - DIAMOND8_OFFSET) / 8);
+  const cells: DiamondCell[] = [];
+  for (let p = 0; p < 4; p++) {
+    for (let q = 0; q < 4; q++) {
+      const [outerRef, innerRef] = DIAMOND8_REFERENCE[p][q];
+      cells.push({
+        p,
+        q,
+        outer: trunc(outerRef - 1 + k),
+        inner: trunc(innerRef - 1 + k),
+      });
+    }
+  }
+  return { cells };
+}
+
+// ---------------------------------------------------------------------
 // 9x9
 // ---------------------------------------------------------------------
 
