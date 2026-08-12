@@ -719,50 +719,100 @@ export interface HatimTriangle {
  * 17 n'en ont AUCUNE, quel que soit l'arrangement) : exactement les 4
  * exemples de l'image de référence d'origine.
  *
- * Généralisation à une valeur D arbitraire (comme carre10/carre11/
- * diamond8, qui décalent uniformément un carré de référence validé) :
- * un décalage uniforme de +k sur les 9 cases d'une solution valide
- * augmente chaque ligne (3 cases) de 3k, donc préserve à la fois
- * l'égalité des 6 lignes ET l'unicité des 9 valeurs (décaler des
- * valeurs distinctes les garde distinctes). Une des 3 solutions de
- * référence (D=12, 14 ou 16 — un représentant par reste modulo 3) est
- * choisie selon D mod 3, puis décalée de k = (D − D_référence) / 3.
+ * RÉFÉRENCE EXACTE fournie par l'utilisateur (image des 4 triangles
+ * D:12/14/16/18) : les valeurs ci-dessous reproduisent très précisément
+ * ces 4 diagrammes (vérifié : chaque triangle est bien une permutation
+ * des chiffres 1 à 9, et les 6 lignes valent chacune D). Fait notable,
+ * vérifié aussi : D:18 est le complément exact de D:12, et D:16 celui
+ * de D:14 (chaque case = 10 − la case correspondante) — cohérent avec
+ * Souter = 15 (voir plus haut) : remplacer chaque valeur v par 10 − v
+ * change chaque ligne de 3 cases de D à 30 − D, donc transforme
+ * automatiquement une solution D=12 en solution D=18 (30 − 12), et
+ * D=14 en D=16 (30 − 14).
+ *
+ * Généralisation à une valeur D arbitraire hors {12, 14, 16, 18} —
+ * comme carre10/carre11/diamond8, qui décalent uniformément une
+ * référence validée : un décalage uniforme de +k sur les 9 cases
+ * d'une solution valide augmente chaque ligne (3 cases) de 3k, donc
+ * préserve à la fois l'égalité des 6 lignes ET l'unicité des 9
+ * valeurs (décaler des valeurs distinctes les garde distinctes). Une
+ * des 3 solutions de référence (D=12, 14 ou 16 — un représentant par
+ * reste modulo 3) est choisie selon D mod 3, puis décalée de
+ * k = (D − D_référence) / 3.
  */
-const HATIM_TRIANGLE_REF: Record<
-  number,
-  { d: number; a: number; bl: number; br: number; l: number; r: number; m: number; ct: number; cl: number; cr: number }
-> = {
-  0: { d: 12, a: 4, bl: 5, br: 6, l: 3, r: 2, m: 1, ct: 7, cl: 8, cr: 9 },
-  1: { d: 16, a: 2, bl: 5, br: 8, l: 9, r: 6, m: 3, ct: 1, cl: 4, cr: 7 },
-  2: { d: 14, a: 2, bl: 5, br: 8, l: 7, r: 4, m: 1, ct: 3, cl: 6, cr: 9 },
+type HatimTriangleCells = {
+  a: number; // sommet
+  l: number; // gauche
+  r: number; // droite
+  bl: number; // baseGauche
+  m: number; // bas
+  br: number; // baseDroite
+  ct: number; // centreHaut
+  cl: number; // centreGauche
+  cr: number; // centreDroite
+};
+
+const HATIM_D12: HatimTriangleCells = { a: 4, l: 2, r: 3, bl: 6, m: 1, br: 5, ct: 7, cl: 9, cr: 8 };
+const HATIM_D14: HatimTriangleCells = { a: 2, l: 4, r: 7, bl: 8, m: 1, br: 5, ct: 3, cl: 9, cr: 6 };
+
+function hatimComplement(t: HatimTriangleCells): HatimTriangleCells {
+  return {
+    a: 10 - t.a, l: 10 - t.l, r: 10 - t.r,
+    bl: 10 - t.bl, m: 10 - t.m, br: 10 - t.br,
+    ct: 10 - t.ct, cl: 10 - t.cl, cr: 10 - t.cr,
+  };
+}
+
+const HATIM_D18 = hatimComplement(HATIM_D12);
+const HATIM_D16 = hatimComplement(HATIM_D14);
+
+// Les 4 seules valeurs de D ayant une solution 100% unique aux chiffres
+// 1-9 : reproduites EXACTEMENT (aucun décalage), pour matcher l'image
+// de référence au chiffre près.
+const HATIM_TRIANGLE_EXACT: Record<number, HatimTriangleCells> = {
+  12: HATIM_D12,
+  14: HATIM_D14,
+  16: HATIM_D16,
+  18: HATIM_D18,
+};
+
+// Un représentant par reste modulo 3, utilisé pour généraliser à un D
+// hors de la table exacte ci-dessus (voir doc de hatimTriangulaire).
+const HATIM_TRIANGLE_ANCHOR: Record<number, { d: number } & HatimTriangleCells> = {
+  0: { d: 12, ...HATIM_D12 },
+  1: { d: 16, ...HATIM_D16 },
+  2: { d: 14, ...HATIM_D14 },
 };
 
 export function hatimTriangulaire(hajah: number): HatimTriangle {
   const d = trunc(hajah);
-  const mod3 = ((d % 3) + 3) % 3;
-  const ref = HATIM_TRIANGLE_REF[mod3];
-  const k = (d - ref.d) / 3;
+  const exact = HATIM_TRIANGLE_EXACT[d];
 
-  const sommet = ref.a + k;
-  const baseGauche = ref.bl + k;
-  const baseDroite = ref.br + k;
-  const gauche = ref.l + k;
-  const droite = ref.r + k;
-  const bas = ref.m + k;
-  const centreHaut = ref.ct + k;
-  const centreGauche = ref.cl + k;
-  const centreDroite = ref.cr + k;
+  let cells: HatimTriangleCells;
+  if (exact) {
+    cells = exact;
+  } else {
+    const mod3 = ((d % 3) + 3) % 3;
+    const anchor = HATIM_TRIANGLE_ANCHOR[mod3];
+    const k = (d - anchor.d) / 3;
+    cells = {
+      a: anchor.a + k, l: anchor.l + k, r: anchor.r + k,
+      bl: anchor.bl + k, m: anchor.m + k, br: anchor.br + k,
+      ct: anchor.ct + k, cl: anchor.cl + k, cr: anchor.cr + k,
+    };
+  }
+
   return {
     d,
-    sommet,
-    baseGauche,
-    baseDroite,
-    gauche,
-    droite,
-    bas,
-    centreHaut,
-    centreGauche,
-    centreDroite,
+    sommet: cells.a,
+    baseGauche: cells.bl,
+    baseDroite: cells.br,
+    gauche: cells.l,
+    droite: cells.r,
+    bas: cells.m,
+    centreHaut: cells.ct,
+    centreGauche: cells.cl,
+    centreDroite: cells.cr,
   };
 }
 
