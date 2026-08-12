@@ -698,30 +698,60 @@ export interface HatimTriangle {
  *   200+294+150=644   200+194+250=644   150+244+250=644
  *   294+156+194=644   294+106+244=644   194+206+244=644
  *
- * Comme pour "Ghazaly" (une seule "hajah" complète tout le carré, et
- * cette valeur se retrouve être la somme de chaque ligne du carré
- * généré), une seule valeur suffit ici : `hajah` devient directement D
- * (la somme de chaque ligne du triangle), et les 3 sommets extérieurs
- * ne sont plus à saisir — ils sont départagés automatiquement en 3
- * valeurs consécutives autour de D/3. Les 6 cases restantes se
- * déduisent ensuite par soustraction, exactement comme avant, ce qui
- * garantit un triangle "parfait" quelle que soit la valeur entrée :
- *   milieu d'un côté extérieur = D − les 2 sommets qu'il relie
- *   sommet du triangle intérieur = D − les 2 milieux adjacents
+ * PREMIÈRE VERSION BUGUÉE (corrigée ici) : départager les 3 sommets en
+ * 3 valeurs CONSÉCUTIVES autour de D/3 provoquait des répétitions
+ * massives dans les 6 cases restantes (démontré : si D est un multiple
+ * de 3, "gauche" retombe exactement sur "baseDroite", etc. — observé
+ * concrètement avec D=9 -> seulement les valeurs 2/3/4, chacune 3
+ * fois).
+ *
+ * CORRECTIF : la somme des 3 sommets extérieurs (Souter = sommet +
+ * baseGauche + baseDroite) est mathématiquement FIXÉE par la structure
+ * elle-même, quelle que soit D (démonstration : en notant Smid la
+ * somme des 3 milieux extérieurs et Sinner celle des 3 sommets
+ * intérieurs, les 6 contraintes de ligne donnent 3D = 2×Souter + Smid
+ * et 3D = 2×Smid + Sinner, et Souter+Smid+Sinner = somme totale des 9
+ * cases ; en résolvant, Souter = (somme totale)/3 toujours). Avec les
+ * 9 chiffres 1..9 (somme totale 45), Souter = 15 obligatoirement, ce
+ * qui borne D à l'intervalle [12, 18] pour une solution 100% unique
+ * (chiffres 1 à 9 chacun une fois) — et une recherche exhaustive
+ * confirme que seuls D = 12, 14, 16, 18 ont une solution (D = 13, 15,
+ * 17 n'en ont AUCUNE, quel que soit l'arrangement) : exactement les 4
+ * exemples de l'image de référence d'origine.
+ *
+ * Généralisation à une valeur D arbitraire (comme carre10/carre11/
+ * diamond8, qui décalent uniformément un carré de référence validé) :
+ * un décalage uniforme de +k sur les 9 cases d'une solution valide
+ * augmente chaque ligne (3 cases) de 3k, donc préserve à la fois
+ * l'égalité des 6 lignes ET l'unicité des 9 valeurs (décaler des
+ * valeurs distinctes les garde distinctes). Une des 3 solutions de
+ * référence (D=12, 14 ou 16 — un représentant par reste modulo 3) est
+ * choisie selon D mod 3, puis décalée de k = (D − D_référence) / 3.
  */
+const HATIM_TRIANGLE_REF: Record<
+  number,
+  { d: number; a: number; bl: number; br: number; l: number; r: number; m: number; ct: number; cl: number; cr: number }
+> = {
+  0: { d: 12, a: 4, bl: 5, br: 6, l: 3, r: 2, m: 1, ct: 7, cl: 8, cr: 9 },
+  1: { d: 16, a: 2, bl: 5, br: 8, l: 9, r: 6, m: 3, ct: 1, cl: 4, cr: 7 },
+  2: { d: 14, a: 2, bl: 5, br: 8, l: 7, r: 4, m: 1, ct: 3, cl: 6, cr: 9 },
+};
+
 export function hatimTriangulaire(hajah: number): HatimTriangle {
   const d = trunc(hajah);
-  const third = trunc(d / 3);
-  const sommet = third - 1;
-  const baseGauche = third;
-  const baseDroite = third + 1;
+  const mod3 = ((d % 3) + 3) % 3;
+  const ref = HATIM_TRIANGLE_REF[mod3];
+  const k = (d - ref.d) / 3;
 
-  const gauche = trunc(d - sommet - baseGauche);
-  const droite = trunc(d - sommet - baseDroite);
-  const bas = trunc(d - baseGauche - baseDroite);
-  const centreHaut = trunc(d - gauche - droite);
-  const centreGauche = trunc(d - gauche - bas);
-  const centreDroite = trunc(d - droite - bas);
+  const sommet = ref.a + k;
+  const baseGauche = ref.bl + k;
+  const baseDroite = ref.br + k;
+  const gauche = ref.l + k;
+  const droite = ref.r + k;
+  const bas = ref.m + k;
+  const centreHaut = ref.ct + k;
+  const centreGauche = ref.cl + k;
+  const centreDroite = ref.cr + k;
   return {
     d,
     sommet,
