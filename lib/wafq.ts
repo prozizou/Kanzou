@@ -687,27 +687,35 @@ export interface HatimTriangle {
 }
 
 /**
- * Hatim triangulaire "parfait" : absent de l'app Android d'origine
- * (aucune Activity Java correspondante à porter). Reconstruit et
- * vérifié à partir d'un exemple fourni par l'utilisateur (sommet=200,
- * base gauche=150, base droite=250, D=644), où chacune des 6 lignes
- * droites du diagramme — les 3 côtés du triangle extérieur ET les 3
- * côtés du triangle médian intérieur — somme exactement à D :
+ * Hatim triangulaire "parfait" — 4e mode du 3x3, à côté de Wilaya /
+ * Ghazaly / Bayt. Absent de l'app Android d'origine (aucune Activity
+ * Java correspondante à porter) : structure géométrique reconstruite
+ * et vérifiée à partir d'un exemple fourni par l'utilisateur
+ * (sommet=200, base gauche=150, base droite=250, D=644), où chacune
+ * des 6 lignes droites du diagramme — les 3 côtés du triangle
+ * extérieur ET les 3 côtés du triangle médian intérieur — somme
+ * exactement à D :
  *   200+294+150=644   200+194+250=644   150+244+250=644
  *   294+156+194=644   294+106+244=644   194+206+244=644
  *
- * Le triangle est donc entièrement déterminé par 4 valeurs libres — D
- * et les 3 sommets extérieurs — chaque case "milieu" valant D moins
- * les deux cases à ses extrémités :
+ * Comme pour "Ghazaly" (une seule "hajah" complète tout le carré, et
+ * cette valeur se retrouve être la somme de chaque ligne du carré
+ * généré), une seule valeur suffit ici : `hajah` devient directement D
+ * (la somme de chaque ligne du triangle), et les 3 sommets extérieurs
+ * ne sont plus à saisir — ils sont départagés automatiquement en 3
+ * valeurs consécutives autour de D/3. Les 6 cases restantes se
+ * déduisent ensuite par soustraction, exactement comme avant, ce qui
+ * garantit un triangle "parfait" quelle que soit la valeur entrée :
  *   milieu d'un côté extérieur = D − les 2 sommets qu'il relie
  *   sommet du triangle intérieur = D − les 2 milieux adjacents
  */
-export function hatimTriangulaire(
-  d: number,
-  sommet: number,
-  baseGauche: number,
-  baseDroite: number
-): HatimTriangle {
+export function hatimTriangulaire(hajah: number): HatimTriangle {
+  const d = trunc(hajah);
+  const third = trunc(d / 3);
+  const sommet = third - 1;
+  const baseGauche = third;
+  const baseDroite = third + 1;
+
   const gauche = trunc(d - sommet - baseGauche);
   const droite = trunc(d - sommet - baseDroite);
   const bas = trunc(d - baseGauche - baseDroite);
