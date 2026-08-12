@@ -3,23 +3,35 @@
 import { useState } from "react";
 import Link from "next/link";
 import SquareGrid, { squareToRows } from "@/components/SquareGrid";
+import HatimTriangleGrid from "@/components/HatimTriangleGrid";
 import NumeralToggle from "@/components/NumeralToggle";
 import TextScaleSlider from "@/components/TextScaleSlider";
 import ExportWordButton from "@/components/ExportWordButton";
-import { wilaya, ghazaly, bayt, SQUARE3_LAYOUT, type Square3 } from "@/lib/wafq";
+import {
+  wilaya,
+  ghazaly,
+  bayt,
+  hatimTriangulaire,
+  hatimTriangleToRows,
+  SQUARE3_LAYOUT,
+  type Square3,
+  type HatimTriangle,
+} from "@/lib/wafq";
 import type { NumeralSystem } from "@/lib/numerals";
 
-type Mode = "wilaya" | "ghazaly" | "bayt";
+type Mode = "wilaya" | "ghazaly" | "bayt" | "hatim";
 
 const MODE_LABELS: Record<Mode, string> = {
   wilaya: "Wilaya (3 valeurs connues)",
   ghazaly: "Ghazaly (une valeur)",
   bayt: "Bayt (deux valeurs)",
+  hatim: "Hatim triangulaire (une valeur)",
 };
 
 export default function Carre3Page() {
   const [mode, setMode] = useState<Mode>("ghazaly");
   const [square, setSquare] = useState<Square3 | null>(null);
+  const [triangle, setTriangle] = useState<HatimTriangle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [numerals, setNumerals] = useState<NumeralSystem>("latin");
   const [scale, setScale] = useState(1);
@@ -36,6 +48,9 @@ export default function Carre3Page() {
   const [bHajah, setBHajah] = useState("");
   const [bEntree, setBEntree] = useState("");
 
+  // Hatim triangulaire
+  const [hD, setHD] = useState("");
+
   function handleCompute() {
     setError(null);
     try {
@@ -51,14 +66,19 @@ export default function Carre3Page() {
         const g = Number(hajah);
         if (Number.isNaN(g)) throw new Error("invalid");
         setSquare(ghazaly(g));
-      } else {
+      } else if (mode === "bayt") {
         const g = Number(bHajah);
         const en = Number(bEntree);
         if (Number.isNaN(g) || Number.isNaN(en)) throw new Error("invalid");
         setSquare(bayt(g, en));
+      } else {
+        const d = Number(hD);
+        if (Number.isNaN(d) || hD.trim() === "") throw new Error("invalid");
+        setTriangle(hatimTriangulaire(d));
       }
     } catch {
       setSquare(null);
+      setTriangle(null);
       setError("Merci de renseigner un nombre valide dans chaque champ.");
     }
   }
@@ -66,6 +86,7 @@ export default function Carre3Page() {
   function handleModeChange(next: Mode) {
     setMode(next);
     setSquare(null);
+    setTriangle(null);
     setError(null);
   }
 
@@ -98,6 +119,17 @@ export default function Carre3Page() {
           ))}
         </div>
 
+        {mode === "hatim" && (
+          <p className="mt-4 max-w-md text-sm text-muted leading-relaxed">
+            Absent de l'app Android d'origine (aucune Activity Java
+            correspondante). Un triangle extérieur (sommet + 2 coins de
+            base) dont le triangle médian intérieur relie les milieux des
+            3 côtés : les 6 lignes droites du diagramme somment toutes à
+            la valeur entrée. Comme pour Ghazaly, une seule valeur suffit
+            — les 3 sommets sont départagés automatiquement.
+          </p>
+        )}
+
         {/* Formulaire selon le mode */}
         <div className="mt-8 space-y-4">
           {mode === "wilaya" && (
@@ -117,6 +149,10 @@ export default function Carre3Page() {
               <Field label="Nombre (hajah)" value={bHajah} onChange={setBHajah} />
               <Field label="Entrée" value={bEntree} onChange={setBEntree} />
             </div>
+          )}
+
+          {mode === "hatim" && (
+            <Field label="Valeur (somme de chaque ligne)" value={hD} onChange={setHD} wide />
           )}
 
           {mode === "bayt" && bHajah && !bEntree && (
@@ -140,7 +176,7 @@ export default function Carre3Page() {
         </div>
 
         {/* Résultat */}
-        {square && (
+        {mode !== "hatim" && square && (
           <div className="mt-10 animate-fade-in space-y-4">
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-6">
               <NumeralToggle value={numerals} onChange={setNumerals} />
@@ -159,6 +195,21 @@ export default function Carre3Page() {
               gap="gap-3"
               maxWidth="max-w-xs"
             />
+          </div>
+        )}
+
+        {mode === "hatim" && triangle && (
+          <div className="mt-10 animate-fade-in space-y-4">
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-6">
+              <NumeralToggle value={numerals} onChange={setNumerals} />
+              <TextScaleSlider value={scale} onChange={setScale} />
+              <ExportWordButton
+                title="Al Kanzou — Hatim triangulaire"
+                rows={hatimTriangleToRows(triangle)}
+                fileName="al-kanzou-hatim-triangulaire"
+              />
+            </div>
+            <HatimTriangleGrid triangle={triangle} numerals={numerals} scale={scale} />
           </div>
         )}
       </div>
