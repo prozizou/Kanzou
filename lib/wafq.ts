@@ -471,6 +471,41 @@ export function diamond8(base: number): Diamond8 {
   return { cells };
 }
 
+/**
+ * Grille rectangulaire (pour l'export Word) reproduisant la silhouette
+ * du losange : les cases sont groupées par niveau visuel (Y = p + q,
+ * 7 niveaux), triées de gauche à droite (X = p - q), chaque case
+ * contribuant ses 2 nombres. Les niveaux plus courts que le niveau le
+ * plus large (8 nombres, l'équateur) sont complétés par des cases
+ * vides de part et d'autre pour rester centrés — comme sur le dessin
+ * d'origine.
+ */
+export function diamond8ToRows(diamond: Diamond8): (number | null)[][] {
+  const byLevel = new Map<number, DiamondCell[]>();
+  for (const cell of diamond.cells) {
+    const y = cell.p + cell.q;
+    if (!byLevel.has(y)) byLevel.set(y, []);
+    byLevel.get(y)!.push(cell);
+  }
+
+  const maxWidth = Math.max(
+    ...Array.from(byLevel.values()).map((cells) => cells.length * 2)
+  );
+
+  const rows: (number | null)[][] = [];
+  for (let y = 0; y <= 6; y++) {
+    const cells = (byLevel.get(y) ?? []).slice().sort((a, b) => a.p - a.q - (b.p - b.q));
+    const values = cells.flatMap((c) => [c.outer, c.inner]);
+    const padding = (maxWidth - values.length) / 2;
+    const row: (number | null)[] = [];
+    for (let i = 0; i < padding; i++) row.push(null);
+    row.push(...values);
+    for (let i = 0; i < padding; i++) row.push(null);
+    rows.push(row);
+  }
+  return rows;
+}
+
 // ---------------------------------------------------------------------
 // 9x9
 // ---------------------------------------------------------------------

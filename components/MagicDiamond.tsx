@@ -31,12 +31,17 @@ type Point = { sx: number; sy: number };
  * second le sommet Sud ou Ouest — vérifié sur les 4 pointes connues
  * (1=Nord, 32=Ouest, 7=Est, 26=Sud).
  */
+const BASE_FONT_SIZE = 13;
+
 export default function MagicDiamond({
   cells,
   numerals,
+  scale = 1,
 }: {
   cells: DiamondCell[];
   numerals: NumeralSystem;
+  /** Multiplicateur manuel de taille de texte, voir TextScaleSlider. */
+  scale?: number;
 }) {
   // Les coordonnées (x, y) des sommets des cases vont de -4 à 4 en X
   // et de -1 à 7 en Y (les coins débordent d'une unité de part et
@@ -118,7 +123,7 @@ export default function MagicDiamond({
               textAnchor="middle"
               dominantBaseline="middle"
               className="fill-parchment font-mono font-bold"
-              fontSize={13}
+              fontSize={BASE_FONT_SIZE * scale}
             >
               {formatNumeral(cell.outer, numerals)}
             </text>
@@ -128,7 +133,7 @@ export default function MagicDiamond({
               textAnchor="middle"
               dominantBaseline="middle"
               className="fill-parchment font-mono font-bold"
-              fontSize={13}
+              fontSize={BASE_FONT_SIZE * scale}
             >
               {formatNumeral(cell.inner, numerals)}
             </text>
