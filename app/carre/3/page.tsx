@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import SquareGrid from "@/components/SquareGrid";
+import SquareGrid, { squareToRows } from "@/components/SquareGrid";
 import NumeralToggle from "@/components/NumeralToggle";
 import TextScaleSlider from "@/components/TextScaleSlider";
+import ExportWordButton from "@/components/ExportWordButton";
 import { wilaya, ghazaly, bayt, SQUARE3_LAYOUT, type Square3 } from "@/lib/wafq";
 import type { NumeralSystem } from "@/lib/numerals";
 
@@ -144,6 +145,11 @@ export default function Carre3Page() {
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-6">
               <NumeralToggle value={numerals} onChange={setNumerals} />
               <TextScaleSlider value={scale} onChange={setScale} />
+              <ExportWordButton
+                title="Al Kanzou — Carré 3 × 3"
+                rows={squareToRows(SQUARE3_LAYOUT, (key) => square[key], numerals)}
+                fileName="al-kanzou-carre-3x3"
+              />
             </div>
             <SquareGrid
               layout={SQUARE3_LAYOUT}

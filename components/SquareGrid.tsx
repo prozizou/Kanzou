@@ -46,3 +46,17 @@ export default function SquareGrid<T>({
     </div>
   );
 }
+
+/**
+ * Même parcours que SquareGrid, mais renvoie une grille 2D de valeurs
+ * déjà formatées (ordre visuel) au lieu de rendre des GridCell. Utilisé
+ * pour l'export Word, qui a besoin des mêmes lignes que celles
+ * affichées à l'écran (avec la numération choisie).
+ */
+export function squareToRows<T>(
+  layout: T[][],
+  getValue: (key: T) => string | number | null,
+  numerals: NumeralSystem
+): (string | number | null)[][] {
+  return layout.map((row) => row.map((key) => formatNumeral(getValue(key), numerals)));
+}
