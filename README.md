@@ -73,11 +73,22 @@ ne pas deviner les calculs.
   dont le triangle médian intérieur relie les milieux des 3 côtés, où
   les 6 lignes droites du diagramme (3 côtés extérieurs + 3 côtés
   intérieurs) somment toutes exactement à D. Comme pour Ghazaly, une
-  seule valeur suffit : elle devient directement D, et les 3 sommets
-  extérieurs sont départagés automatiquement (3 valeurs consécutives
-  autour de D/3) plutôt que d'être saisis à part — le reste se déduit
-  par soustraction, ce qui garantit un triangle "parfait" quelle que
-  soit la valeur entrée.
+  seule valeur suffit : elle devient directement D.
+  **Bug corrigé** : départager les 3 sommets extérieurs en 3 valeurs
+  consécutives autour de D/3 provoquait des répétitions massives dans
+  les 6 cases restantes (démontré avec D=9 : seulement 3 valeurs
+  distinctes, chacune répétée 3 fois). Il se trouve que la somme des 3
+  sommets extérieurs est mathématiquement fixée par la structure quelle
+  que soit D (= un tiers de la somme totale des 9 cases), ce qui borne
+  D à [12, 18] pour une solution 100% unique avec les chiffres 1 à 9 —
+  et une recherche exhaustive montre que seuls D = 12, 14, 16 et 18 ont
+  effectivement une solution (exactement les 4 exemples de l'image de
+  référence d'origine). `hatimTriangulaire()` généralise maintenant ces
+  3 solutions de référence (une par reste modulo 3) à une valeur D
+  arbitraire par décalage uniforme — même principe que `carre10()` /
+  `carre11()` / `diamond8()` — ce qui garantit les 9 valeurs toujours
+  distinctes et les 6 lignes toujours égales à D, quelle que soit la
+  valeur entrée.
 
 ## Architecture
 
